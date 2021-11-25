@@ -1,7 +1,5 @@
 import './App.css'
 
-import MavlinkHandler from './MavlinkHandler'
-import OrientationViz from './OrientationViz'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import "./styles.css"
@@ -12,35 +10,16 @@ import { updateSystem } from './MavlinkSystemSlice'
 import { serialize_helper } from './helper'
 import MavMsgViz from './MavMsgViz'
 import MavMsgInject from './MavMsgInject'
+import { findConnectedUSB } from './Connections'
+import MavlinkHandler from './MavlinkHandler'
+import { common, minimal } from 'mavlink-mappings'
+import OrientationViz from './OrientationViz'
 
 
-const SerialPort = require('chrome-apps-serialport').SerialPort
-const mavlinkHandler = new MavlinkHandler()
-var sport
 
-
-var connectedUSB = []
-function findConnectedUSB() {
-  SerialPort.list().then(ports => {
-    connectedUSB = ports.filter((e) => e.manufacturer!==undefined)
-
-    if (connectedUSB.length>0) {
-      sport = new SerialPort(connectedUSB[0].path, {
-        baudRate: 57600
-      })
-      console.log("connecting to",connectedUSB[0].path)
-
-      sport.on('data', function (data) {
-        mavlinkHandler.write(data)
-      })
-
-    } else {
-      console.log("no usb connection found")
-    }
-  })
-}
 findConnectedUSB()
 
+const mavlinkHandler = MavlinkHandler.getInstance()
 
 
 
@@ -59,10 +38,6 @@ function App() {
           p[k] = serialize_helper(data[k])
         }
         dispatchStore(updateSystem({
-          /*
-          sysid: `vehicle-${sysid}`,
-          compid: `component-${compid}`,
-          */
           sysid: sysid,
           compid: compid,
           msgid: msgid,
@@ -82,6 +57,11 @@ function App() {
       <h1>MAVLINK Viewer</h1>
       <div><OrientationViz /></div>
       <div><MavMsgViz /></div>
+      <div onClick={async () => {
+          const msg = new minimal.Heartbeat()
+          msg.type = minimal.MavType.FIXED_WING
+          await mavlinkHandler.send(msg)
+        }}>Send</div>
       <div><MavMsgInject /></div>
     </>
   );

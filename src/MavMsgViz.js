@@ -35,6 +35,7 @@ const MavMsgViz = () => {
     return (
         <>
             <h1>MavMsgViz</h1>
+            <h5>Systems/Components</h5>
             <div style={{display:"flex", flexDirection: "column", gap:"4px"}}>
                 {(typeof SState=='object') ? expandableList(SState, ``):<div>none</div>}
             </div>

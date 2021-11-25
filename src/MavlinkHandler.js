@@ -1,14 +1,16 @@
 
-import { MavLinkPacketSplitter, MavLinkPacketParser } from 'node-mavlink'
+import { MavLinkPacketSplitter, MavLinkPacketParser, send, MavLinkProtocolV1 } from 'node-mavlink'
 import { minimal, common, ardupilotmega, uavionix, icarous } from 'node-mavlink'
 
-const eventEmitter = require('events');
+const eventEmitter = require('events')
 
-
-class MavlinkHandler extends eventEmitter {
+export class MavlinkHandler extends eventEmitter {
 
     constructor() {
         super()
+
+        this.serialport = undefined
+
         this.mavpsplit = new MavLinkPacketSplitter()
         this.mavpparse = new MavLinkPacketParser()
         this.mavpsplit.pipe(this.mavpparse)
@@ -19,6 +21,10 @@ class MavlinkHandler extends eventEmitter {
             ...ardupilotmega.REGISTRY,
             ...uavionix.REGISTRY,
             ...icarous.REGISTRY,
+        }
+
+        this.getMsgFromMSGID = (id) => {
+            return this.REGISTRY[id]
         }
 
         this.mavpparse.on('data', (packet) => {
@@ -33,12 +39,30 @@ class MavlinkHandler extends eventEmitter {
             }
         })
         
+        if (!MavlinkHandler._instance) {
+            MavlinkHandler._instance = this;
+      }
+      return MavlinkHandler._instance;
+    }
+
+    static getInstance() {
+        if (!this._instance) {
+            this._instance = new MavlinkHandler()
+        }
+        return this._instance
     }
 
     write(data) {
         this.mavpsplit.write(data)
     }
 
+    async send(msg) {
+        if (this.serialport===undefined) {
+            console.log("serialport is undefined")
+        } else {
+            await send(this.serialport, msg, new MavLinkProtocolV1())
+        }
+    }
 
 }
 

@@ -30,11 +30,11 @@ function PlaneShape(props) {
     const zgeom = new THREE.BufferGeometry().setFromPoints( z_points )
 
     const xy_points = []
-    xy_points.push( new THREE.Vector3( 0.7, 0,  -0.7 ) )
+    xy_points.push( new THREE.Vector3( -0.7, 0,  -0.7 ) )
+    xy_points.push( new THREE.Vector3( 0.7, 0,   -0.7 ) )
     xy_points.push( new THREE.Vector3(  0,    0,   1 ) )
     xy_points.push( new THREE.Vector3( -0.7, 0,  -0.7 ) )
-    xy_points.push( new THREE.Vector3(  0.7, 0,  -0.7 ) )
-    xy_points.push( new THREE.Vector3(  0.7, 0,   0 ) )
+    xy_points.push( new THREE.Vector3( -0.7, 0,   0 ) )
     const xygeom = new THREE.BufferGeometry().setFromPoints( xy_points )
 
     const vert_points = []
